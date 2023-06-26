@@ -17,8 +17,31 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 	</PropertyGroup>
 
+
+  <PropertyGroup>
+    <PackageReleaseNotes>Under construction</PackageReleaseNotes>
+    <Version>1.0.1.1-pre</Version>
+    <Title>AppoMobi.Maui.Navigation</Title>
+    <Description>Navigation helpers for .Net Maui</Description>
+    <PackageTags>maui navigation</PackageTags>
+    <Authors>Nick Kovalsky aka AppoMobi</Authors>
+    <Copyright>(c) AppoMobi, 2022 - present day</Copyright>
+    <RepositoryUrl>https://github.com/taublast/AppoMobi.Maui.Navigation</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
 	<ItemGroup>
 	  <PackageReference Include="AppoMobi.Specials" Version="7.0.0.3" />
 	</ItemGroup>
+
+
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <CreatePackage>True</CreatePackage>
+  </PropertyGroup>
+
 
 </Project>
