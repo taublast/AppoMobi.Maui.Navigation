@@ -408,7 +408,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
 
     }
 
-    private string rootRoute;
+    protected string _rootRoute;
     private readonly IServiceProvider _services;
 
     public static string BuildRoute(string host, IDictionary<string, object> arguments = null)
@@ -428,7 +428,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
     public virtual void SetRoot(string host, IDictionary<string, object> arguments = null)
     {
         var currentRoute = BuildRoute(host, arguments);
-        if (currentRoute == rootRoute)
+        if (currentRoute == _rootRoute)
             return;
 
         var page = GetOrCreateContent(host) as Page;
@@ -438,7 +438,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
             var navi = SetDetail(page);
             NavigationRoot = navi.Navigation;
 
-            rootRoute = currentRoute;
+            _rootRoute = currentRoute;
         }
         else
         {
@@ -534,8 +534,8 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
 
     }
 
-    //     var page = GetOrCreateContent(registered) as Page;
-    public virtual T GetOrCreateContent<T>(ShellNavigationState state) where T : BindableObject
+
+    public virtual T GetOrCreateContentSetArguments<T>(ShellNavigationState state) where T : BindableObject
     {
         var route = state.Location.OriginalString.Trim();
 

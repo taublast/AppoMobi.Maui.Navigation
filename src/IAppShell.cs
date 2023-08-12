@@ -7,7 +7,7 @@ namespace AppoMobi.Maui.Navigation;
 /// </summary>
 public interface IAppShell
 {
-    public T GetOrCreateContent<T>(ShellNavigationState state) where T : BindableObject;
+    public T GetOrCreateContentSetArguments<T>(ShellNavigationState state) where T : BindableObject;
 
     //xamarin shell
     public Task GoToAsync(ShellNavigationState state);
