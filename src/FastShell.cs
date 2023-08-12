@@ -5,8 +5,8 @@ using System.Diagnostics;
 namespace AppoMobi.Maui.Navigation;
 
 /// <summary>
-/// Simulating Xamarin Shell
-/// https://github.com/dotnet/maui/blob/18ed02b41a35edad98aef79ec677c42ebff52890/src/Controls/src/Core/Routing.cs
+/// Simulating Xamarin/Maui Shell.
+/// Uses usual Shell DI for routing.
 /// </summary>
 public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
 {
@@ -26,6 +26,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
         if (Handler != null)
         {
 #if ANDROID
+            //we replace some layout visual parts with our own, this is totally optional
             InitializeNative(Handler);
 #endif
         }
@@ -270,7 +271,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
             }
             ShellNavigationStack.RemoveLast();
 
-            return inStack.Page;
+            return inStack.Page as Page;
         }
 
         return null;
@@ -298,7 +299,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
             }
             ShellModalNavigationStack.RemoveLast();
 
-            return inStack.Page;
+            return inStack.Page as Page;
         }
 
         return null;
@@ -367,7 +368,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
     {
         get
         {
-            return ShellModalNavigationStack.Select(s => s.Page).ToList();
+            return ShellModalNavigationStack.Select(s => s.Page as Page).ToList();
             //            return _navigation.ModalStack;
         }
     }
@@ -376,7 +377,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
     {
         get
         {
-            return ShellNavigationStack.Select(s => s.Page).ToList();
+            return ShellNavigationStack.Select(s => s.Page as Page).ToList();
             //return _navigation.NavigationStack;
         }
     }
@@ -385,7 +386,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
     {
         public string Route { get; set; }
         public IDictionary<string, object> Arguments { get; set; }
-        public Page Page { get; set; }
+        public BindableObject Page { get; set; }
     }
 
     protected LinkedList<PageInStack> ShellNavigationStack { get; } = new LinkedList<PageInStack>();
@@ -397,11 +398,10 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
 
     #region IAppShell
 
-
     public string OrderedRoute { get; protected set; }
 
 
-    public async Task GoToAsync(ShellNavigationState state)
+    public virtual async Task GoToAsync(ShellNavigationState state)
     {
 
         await GoToAsync(state, false);
@@ -411,7 +411,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
     private string rootRoute;
     private readonly IServiceProvider _services;
 
-    string BuildRoute(string host, IDictionary<string, object> arguments = null)
+    public static string BuildRoute(string host, IDictionary<string, object> arguments = null)
     {
         var ret = host;
         if (arguments != null)
@@ -425,7 +425,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
         return ret;
     }
 
-    public void SetRoot(string host, IDictionary<string, object> arguments = null)
+    public virtual void SetRoot(string host, IDictionary<string, object> arguments = null)
     {
         var currentRoute = BuildRoute(host, arguments);
         if (currentRoute == rootRoute)
@@ -446,7 +446,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
         }
     }
 
-    public async Task PushRegisteredPageAsync(string registered, bool animate, IDictionary<string, object> arguments = null)
+    public virtual async Task PushRegisteredPageAsync(string registered, bool animate, IDictionary<string, object> arguments = null)
     {
         var page = GetOrCreateContent(registered) as Page;
         if (page != null)
@@ -463,9 +463,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
         }
     }
 
-    //public ViewSwitcher ViewSwitcher { get; set; }
-
-    protected void SetArguments(Page page, IDictionary<string, object> arguments)
+    protected virtual void SetArguments(BindableObject page, IDictionary<string, object> arguments)
     {
         if (page != null && arguments != null)
         {
@@ -487,13 +485,13 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
         }
     }
 
-    class ParsedRoute
+    public class ParsedRoute
     {
         public List<string> Parts { get; set; }
         public IDictionary<string, object> Arguments { get; set; }
     }
 
-    static ParsedRoute ParseState(ShellNavigationState state)
+    public static ParsedRoute ParseState(ShellNavigationState state)
     {
         if (!state.Location.IsAbsoluteUri)
         {
@@ -502,7 +500,8 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
         }
         return null;
     }
-    static ParsedRoute ParseRoute(string route)
+
+    public static ParsedRoute ParseRoute(string route)
     {
 
         var fix = new Uri("fix://" + route.Trim('/'));
@@ -535,7 +534,65 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
 
     }
 
-    public async Task GoToAsync(ShellNavigationState state, bool animate)
+    //     var page = GetOrCreateContent(registered) as Page;
+    public virtual T GetOrCreateContent<T>(ShellNavigationState state) where T : BindableObject
+    {
+        var route = state.Location.OriginalString.Trim();
+
+        if (!state.Location.IsAbsoluteUri)
+        {
+            var parsed = ParseRoute(route);
+            if (parsed != null)
+            {
+                IDictionary<string, object> passArguments = null;
+                int index = 1;
+                foreach (var part in parsed.Parts)
+                {
+                    if (index == parsed.Parts.Count && parsed.Arguments.Count > 0)
+                    {
+                        passArguments = parsed.Arguments;
+                    }
+
+                    if (index == 1 && route.Left(2) == "//")
+                    {
+                        var content = GetOrCreateContent(part) as T; //that was ROOT
+                        if (content != null)
+                        {
+                            SetArguments(content, passArguments);
+                        }
+                        return content;
+                    }
+                    else
+                    {
+                        if (part == "..")
+                        {
+                            return null; //that was POP
+                        }
+
+                        if (tab_routes.TryGetValue(part, out var action))
+                        {
+                            return null; //that was ACTION
+                        }
+
+                        var content = GetOrCreateContent(part) as T;
+                        if (content != null)
+                        {
+                            SetArguments(content, passArguments);
+                        }
+
+                        return content;
+                    }
+                    index++;
+                }
+            }
+        }
+
+        Console.WriteLine($"[FastShell] Unsupported URI {route}");
+
+        return null;
+    }
+
+    public virtual async Task GoToAsync(ShellNavigationState state, bool animate)
     {
         var route = state.Location.OriginalString.Trim();
 
@@ -593,8 +650,6 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
         }
 
         Console.WriteLine($"[FastShell] Unsupported URI {route}");
-
-
     }
 
     public new INavigation Navigation => this;

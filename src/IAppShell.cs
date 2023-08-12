@@ -2,31 +2,38 @@
 
 namespace AppoMobi.Maui.Navigation;
 
+/// <summary>
+/// All the methods and properties that are required for the AppShell to work.
+/// </summary>
 public interface IAppShell
 {
-	//xamarin shell
-	public Task GoToAsync(ShellNavigationState state);
+    public T GetOrCreateContent<T>(ShellNavigationState state) where T : BindableObject;
 
-	public Task GoToAsync(ShellNavigationState state, bool animate);
+    //xamarin shell
+    public Task GoToAsync(ShellNavigationState state);
 
-	public INavigation Navigation { get; }
+    public Task GoToAsync(ShellNavigationState state, bool animate);
 
-	public event EventHandler<ShellNavigatedEventArgs> Navigated;
+    public INavigation Navigation { get; }
 
-	public event EventHandler<ShellNavigatingEventArgs> Navigating;
-	public bool FlyoutIsPresented { get; set; }
-	public bool FlyoutEnabled { get; set; }
+    public event EventHandler<ShellNavigatedEventArgs> Navigated;
 
-	//custom
-	public void Start(string route);
+    public event EventHandler<ShellNavigatingEventArgs> Navigating;
 
-	public void InvalidateNavBar();
+    public bool FlyoutIsPresented { get; set; }
 
-	public event EventHandler<RotationEventArgs> OnRotation;
+    public bool FlyoutEnabled { get; set; }
 
-	public event EventHandler<IndexArgs> TabReselected;
+    //custom
+    public void Start(string route);
 
-	public ObservableCollection<MenuPageItem> MenuItems { get; }
+    public void InvalidateNavBar();
 
-	public Task PopTabToRoot();
+    public event EventHandler<RotationEventArgs> OnRotation;
+
+    public event EventHandler<IndexArgs> TabReselected;
+
+    public ObservableCollection<MenuPageItem> MenuItems { get; }
+
+    public Task PopTabToRoot();
 }
