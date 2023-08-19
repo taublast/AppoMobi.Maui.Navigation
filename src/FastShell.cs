@@ -244,8 +244,6 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
 
     #region INavigation
 
-
-
     public void InsertPageBefore(Page page, Page before)
     {
         NavigationRoot.InsertPageBefore(page, before);
@@ -533,7 +531,6 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
         };
 
     }
-
 
     public virtual T GetOrCreateContentSetArguments<T>(ShellNavigationState state) where T : BindableObject
     {
