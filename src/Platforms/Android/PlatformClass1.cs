@@ -11,6 +11,7 @@ namespace AppoMobi.Maui.Navigation
     // All the code in this file is only included on Android.
     public partial class FastShell
     {
+        bool once = false;
         /// <summary>
         /// I fail to understand why app background should be #FFFFFF
         /// and why to destroy the splash background after app launched, not letting us animate app content to fade in after splash screen.
@@ -19,13 +20,14 @@ namespace AppoMobi.Maui.Navigation
         /// <param name="handler"></param>
         public void InitializeNative(IViewHandler handler)
         {
-            if (handler.PlatformView is DrawerLayout drawerLayout)
+            if (!once && handler.PlatformView is DrawerLayout drawerLayout)
             {
-                drawerLayout.Background = null;
-                var rootView = drawerLayout.Context?.GetActivity()?.Window?.DecorView;
-                if (rootView != null)
+                once = true;
+                try
                 {
-                    try
+                    drawerLayout.Background = null;
+                    var rootView = drawerLayout.Context?.GetActivity()?.Window?.DecorView;
+                    if (rootView != null)
                     {
                         var PackageName = Platform.CurrentActivity.PackageName;
 
@@ -51,11 +53,12 @@ namespace AppoMobi.Maui.Navigation
                         // Set the drawable as the background of the root view
                         rootView.SetBackground(layerDrawable);
                     }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                    }
                 }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+
             }
         }
     }
