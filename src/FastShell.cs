@@ -1,4 +1,5 @@
 ﻿using AppoMobi.Specials.Extensions;
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 
@@ -696,4 +697,15 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
     }
 
     #endregion
+
+
+    #region BUFFER
+
+    /// <summary>
+    /// Can use to pass items as models between viewmodels
+    /// </summary>
+    public static ConcurrentDictionary<string, object> Buffer { get; } = new();
+
+    #endregion
+
 }
