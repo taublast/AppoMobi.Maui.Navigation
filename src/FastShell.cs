@@ -448,6 +448,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
     public virtual async Task PushRegisteredPageAsync(string registered, bool animate, IDictionary<string, object> arguments = null)
     {
         var page = GetOrCreateContent(registered) as Page;
+
         if (page != null)
         {
             SetArguments(page, arguments);
@@ -535,6 +536,11 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
 
     public virtual T GetOrCreateContentSetArguments<T>(ShellNavigationState state) where T : BindableObject
     {
+        return GetOrCreateContentSetArguments<T>(state, null);
+    }
+
+    public virtual T GetOrCreateContentSetArguments<T>(ShellNavigationState state, IDictionary<string, object> arguments) where T : BindableObject
+    {
         var route = state.Location.OriginalString.Trim();
 
         if (!state.Location.IsAbsoluteUri)
@@ -556,6 +562,10 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
                         var content = GetOrCreateContent(part) as T; //that was ROOT
                         if (content != null)
                         {
+                            if (arguments != null)
+                            {
+                                SetArguments(content, arguments);
+                            }
                             SetArguments(content, passArguments);
                         }
                         return content;
@@ -575,6 +585,10 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
                         var content = GetOrCreateContent(part) as T;
                         if (content != null)
                         {
+                            if (arguments != null)
+                            {
+                                SetArguments(content, arguments);
+                            }
                             SetArguments(content, passArguments);
                         }
 
