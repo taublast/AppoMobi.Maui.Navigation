@@ -111,18 +111,25 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
 
     #region ROUTER
 
-    static Dictionary<string, RouteFactory> s_routes = new Dictionary<string, RouteFactory>();
+    static Dictionary<string, TypeRouteFactory> s_routes = new();
+
     public static void RegisterRoute(string route, Type type)
     {
         RegisterRoute(route, new TypeRouteFactory(type));
     }
 
-    public Element GetOrCreateContent(string route)
+    public BindableObject GetOrCreateContent(string route)
     {
-        Element result = null;
+        BindableObject result = null;
 
         if (s_routes.TryGetValue(route, out var content))
-            result = content.GetOrCreate(_services);
+        {
+            //var createContent = content.GetOrCreate(_services);
+
+            var createContent = content.GetOrCreateObject(_services);
+
+            result = createContent;
+        }
 
         if (result == null)
         {
@@ -138,7 +145,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
         return result;
     }
 
-    public static void SetRoute(Element obj, string value)
+    public static void SetRoute(BindableObject obj, string value)
     {
         obj.SetValue(RouteProperty, value);
     }
@@ -168,13 +175,33 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
             return (Element)Activator.CreateInstance(_type);
         }
 
+        public BindableObject GetOrCreateObject(IServiceProvider services)
+        {
+            if (services != null)
+            {
+                var o = services.GetService(_type);
+                if (o == null)
+                {
+                    o = Activator.CreateInstance(_type);
+                }
+
+                return (BindableObject)o;
+            }
+            return (BindableObject)Activator.CreateInstance(_type);
+        }
+
         public override Element GetOrCreate(IServiceProvider services)
         {
             if (services != null)
             {
-                return (Element)(services.GetService(_type) ?? Activator.CreateInstance(_type));
-            }
+                var o = services.GetService(_type);
+                if (o == null)
+                {
+                    o = Activator.CreateInstance(_type);
+                }
 
+                return (Element)o;
+            }
             return (Element)Activator.CreateInstance(_type);
         }
 
@@ -207,7 +234,8 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
                 throw new ArgumentException($"Route contains invalid characters in \"{part}\"");
         }
 
-        RouteFactory existingRegistration = null;
+        TypeRouteFactory existingRegistration = null;
+
         if (s_routes.TryGetValue(route, out existingRegistration) && !existingRegistration.Equals(routeFactory))
             throw new ArgumentException($"Duplicated Route: \"{route}\"");
     }
@@ -226,7 +254,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
         return route;
     }
 
-    public static void RegisterRoute(string route, RouteFactory factory)
+    public static void RegisterRoute(string route, TypeRouteFactory factory)
     {
         if (!String.IsNullOrWhiteSpace(route))
             route = FormatRoute(route);
