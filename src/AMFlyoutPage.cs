@@ -1,139 +1,139 @@
 ﻿namespace AppoMobi.Maui.Navigation
 {
-	public class AMFlyoutPage : FlyoutPage
-	{
-		protected override bool OnBackButtonPressed()
-		{
-			return base.OnBackButtonPressed();
-		}
+    public class AMFlyoutPage : FlyoutPage
+    {
+        protected override bool OnBackButtonPressed()
+        {
+            return base.OnBackButtonPressed();
+        }
 
-		public AMFlyoutPage()
-		{
-			try
-			{
-				var menu = new ContentPage
-				{
-					Title = "...",
-					BindingContext = this
-				};
+        public AMFlyoutPage()
+        {
+            try
+            {
+                var menu = new ContentPage
+                {
+                    Title = "...",
+                    BindingContext = this
+                };
 
-				Flyout = menu;
-			}
-			catch (Exception e)
-			{
-				Console.WriteLine(e);
-				throw;
-			}
-		}
+                Flyout = menu;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
 
-		//-------------------------------------------------------------
-		// IsOpening
-		//-------------------------------------------------------------
-		private const string nameIsOpening = "IsOpening";
-		public static readonly BindableProperty IsOpeningProperty = BindableProperty.Create(nameIsOpening, typeof(bool), typeof(AMFlyoutPage), false);
-		public bool IsOpening
-		{
-			get { return (bool)GetValue(IsOpeningProperty); }
-			set { SetValue(IsOpeningProperty, value); }
-		}
+        //-------------------------------------------------------------
+        // IsOpening
+        //-------------------------------------------------------------
+        private const string nameIsOpening = "IsOpening";
+        public static readonly BindableProperty IsOpeningProperty = BindableProperty.Create(nameIsOpening, typeof(bool), typeof(AMFlyoutPage), false);
+        public bool IsOpening
+        {
+            get { return (bool)GetValue(IsOpeningProperty); }
+            set { SetValue(IsOpeningProperty, value); }
+        }
 
-		//protected override void OnAppearing()
-		//{
-		//    base.OnAppearing();
+        //protected override void OnAppearing()
+        //{
+        //    base.OnAppearing();
 
-		//    App.Instance.Messager.Subscribe<string>(this, "Menu", async (sender, arg) =>
-		//   {
-		//       if (arg == "Disable")
-		//       {
-		//           IsGestureEnabled = false;
-		//       }
-		//       else
-		//       if (arg == "Enable")
-		//       {
-		//           IsGestureEnabled = true;
-		//       }
-		//   });
+        //    App.Instance.Messager.Subscribe<string>(this, "Menu", async (sender, arg) =>
+        //   {
+        //       if (arg == "Disable")
+        //       {
+        //           IsGestureEnabled = false;
+        //       }
+        //       else
+        //       if (arg == "Enable")
+        //       {
+        //           IsGestureEnabled = true;
+        //       }
+        //   });
 
-		//}
+        //}
 
-		//protected override void OnDisappearing()
-		//{
-		//    base.OnDisappearing();
+        //protected override void OnDisappearing()
+        //{
+        //    base.OnDisappearing();
 
-		//    App.Instance.Messager.Unsubscribe(this, "Menu");
-		//}
-
-
-		//Cache
-		Dictionary<Type, AMNavigationPage> MenuPages = new Dictionary<Type, AMNavigationPage>();
+        //    App.Instance.Messager.Unsubscribe(this, "Menu");
+        //}
 
 
-		public AMNavigationPage SetDetail(Type pageType, params object[] parameters)
-		{
-			AMNavigationPage ret = null;
+        //Cache
+        Dictionary<Type, AMNavigationPage> MenuPages = new Dictionary<Type, AMNavigationPage>();
 
-			//add-create page to cache
-			if (!MenuPages.ContainsKey(pageType))
-			{
-				//todo new create page
-				var obj = Activator.CreateInstance(pageType, parameters);
-				var page = (Page)obj;
-				var navi = new AMNavigationPage(page);
 
-				MenuPages.Add(pageType, navi);
-			}
+        public AMNavigationPage SetDetail(Type pageType, params object[] parameters)
+        {
+            AMNavigationPage ret = null;
 
-			//take existing page from cache
-			var newPage = MenuPages[pageType];
+            //add-create page to cache
+            if (!MenuPages.ContainsKey(pageType))
+            {
+                //todo new create page
+                var obj = Activator.CreateInstance(pageType, parameters);
+                var page = (Page)obj;
+                var navi = new AMNavigationPage(page);
 
-			//change page if not already presented
-			if (newPage != null && Detail != newPage)
-			{
-				//todo change upon upper styles
-				//fixes status bar color
-				newPage.BarTextColor = Colors.White; //StatusBar text color for ios
-				newPage.BarBackgroundColor = Colors.White;
+                MenuPages.Add(pageType, navi);
+            }
 
-				Detail = newPage;
-				ret = newPage;
-			}
+            //take existing page from cache
+            var newPage = MenuPages[pageType];
 
-			return ret;
-		}
+            //change page if not already presented
+            if (newPage != null && Detail != newPage)
+            {
+                //todo change upon upper styles
+                //fixes status bar color
+                newPage.BarTextColor = Colors.White; //StatusBar text color for ios
+                newPage.BarBackgroundColor = Colors.White;
 
-		public Page RootPage
-		{
-			get
-			{
-				if (Detail is AMNavigationPage navi)
-				{
-					return navi.CurrentPage;
-				}
-				return null;
-			}
-		}
+                Detail = newPage;
+                ret = newPage;
+            }
 
-		public AMNavigationPage SetDetail(Page page)
-		{
-			AMNavigationPage ret = null;
+            return ret;
+        }
 
-			if (Detail is AMNavigationPage navi)
-			{
-				if (navi.CurrentPage == page)
-					return navi;
-			}
+        public Page RootPage
+        {
+            get
+            {
+                if (Detail is AMNavigationPage navi)
+                {
+                    return navi.CurrentPage;
+                }
+                return null;
+            }
+        }
 
-			var newPage = new AMNavigationPage(page);
+        public AMNavigationPage SetDetail(Page page)
+        {
+            AMNavigationPage ret = null;
 
-			//todo change upon upper styles
-			//fixes status bar color
-			newPage.BarTextColor = Colors.White; //StatusBar text color for ios
-			newPage.BarBackgroundColor = Colors.White;
+            if (Detail is AMNavigationPage navi)
+            {
+                if (navi.CurrentPage == page)
+                    return navi;
+            }
 
-			Detail = newPage;
-			ret = newPage;
+            var newPage = new AMNavigationPage(page);
 
-			return ret;
-		}
-	}
+            //todo change upon upper styles
+            //fixes status bar color
+            newPage.BarTextColor = Colors.White; //StatusBar text color for ios
+            newPage.BarBackgroundColor = Colors.White;
+
+            Detail = newPage;
+            ret = newPage;
+
+            return ret;
+        }
+    }
 }
