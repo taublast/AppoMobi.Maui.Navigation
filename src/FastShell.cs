@@ -51,7 +51,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
 
         //_navigation = new InternalNavigation(this, _flyoutPage.Navigation);
 
-        SetRoot(startupRoute.Parts[0]);
+        SetRoot(startupRoute.Parts[0], true);
 
         OrderedRoute = route;
 
@@ -452,10 +452,10 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
         return ret;
     }
 
-    public virtual void SetRoot(string host, IDictionary<string, object> arguments = null)
+    public virtual void SetRoot(string host, bool replace, IDictionary<string, object> arguments = null)
     {
         var currentRoute = BuildRoute(host, arguments);
-        if (currentRoute == _rootRoute)
+        if (currentRoute == _rootRoute && !replace)
             return;
 
         var page = GetOrCreateContent(host) as Page;
@@ -652,7 +652,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
 
                     if (index == 1 && route.Left(2) == "//")
                     {
-                        SetRoot(part, passArguments);
+                        SetRoot(part, false, passArguments);
                     }
                     else
                     {

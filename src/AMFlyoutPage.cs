@@ -89,13 +89,17 @@
             //change page if not already presented
             if (newPage != null && Detail != newPage)
             {
-                //todo change upon upper styles
-                //fixes status bar color
-                newPage.BarTextColor = Colors.White; //StatusBar text color for ios
-                newPage.BarBackgroundColor = Colors.White;
+                newPage = OnCreatingNavigationPage(newPage);
+
+                var kill = Detail;
 
                 Detail = newPage;
                 ret = newPage;
+
+                if (kill is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
             }
 
             return ret;
@@ -120,20 +124,33 @@
             if (Detail is AMNavigationPage navi)
             {
                 if (navi.CurrentPage == page)
-                    return navi;
+                    return navi; //nothing changed
             }
 
             var newPage = new AMNavigationPage(page);
 
-            //todo change upon upper styles
-            //fixes status bar color
-            newPage.BarTextColor = Colors.White; //StatusBar text color for ios
-            newPage.BarBackgroundColor = Colors.White;
+            var kill = Detail;
+
+            newPage = OnCreatingNavigationPage(newPage);
 
             Detail = newPage;
             ret = newPage;
 
+            if (kill is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+
             return ret;
+        }
+
+        protected virtual AMNavigationPage OnCreatingNavigationPage(AMNavigationPage newPage)
+        {
+            //fixes status bar color
+            //newPage.BarTextColor = Colors.White; //StatusBar text color for ios
+            //newPage.BarBackgroundColor = Colors.White;
+
+            return newPage;
         }
     }
 }

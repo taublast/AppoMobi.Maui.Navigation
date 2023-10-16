@@ -3,7 +3,6 @@ using Android.Views;
 using AndroidX.Core.Content;
 using AndroidX.DrawerLayout.Widget;
 using Microsoft.Maui.Controls.Platform;
-using Microsoft.Maui.Controls.PlatformConfiguration;
 using Microsoft.Maui.Platform;
 
 namespace AppoMobi.Maui.Navigation
