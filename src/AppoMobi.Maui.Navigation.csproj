@@ -38,5 +38,12 @@
 	  <PackageReference Include="AppoMobi.Specials" Version="7.0.0.3" />
 	</ItemGroup>
 
+  <PropertyGroup Condition="'$(Configuration)'=='DebugRefs'">
+    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='ReleaseRefs'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
 
 </Project>
