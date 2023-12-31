@@ -1,4 +1,4 @@
-﻿using AppoMobi.Specials.Extensions;
+﻿using AppoMobi.Specials;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Diagnostics;

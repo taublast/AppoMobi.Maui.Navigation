@@ -20,7 +20,7 @@
 
   <PropertyGroup>
     <PackageReleaseNotes>Under construction</PackageReleaseNotes>
-    <Version>1.0.3.1-pre</Version>
+    <Version>1.0.7.1-pre</Version>
     <Title>AppoMobi.Maui.Navigation</Title>
     <Description>Navigation helpers for .Net Maui</Description>
     <PackageTags>maui navigation</PackageTags>
@@ -34,7 +34,7 @@
   </PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="AppoMobi.Specials" Version="7.0.0.3" />
+	  <PackageReference Include="AppoMobi.Specials" Version="8.0.2" />
 	</ItemGroup>
 
 </Project>
