@@ -9,8 +9,18 @@ namespace AppoMobi.Maui.Navigation;
 /// Simulating Xamarin/Maui Shell.
 /// Uses usual Shell DI for routing.
 /// </summary>
-public partial class FastShell : AMFlyoutPage, IAppShell, INavigation
+public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposable
 {
+    public void Dispose()
+    {
+        OnDisposing();
+    }
+
+    protected virtual void OnDisposing()
+    {
+
+    }
+
     public FastShell(IServiceProvider services)
     {
         Debug.WriteLine($"[STARTUP] FAST Shell Created.");

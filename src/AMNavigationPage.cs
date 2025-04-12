@@ -3,17 +3,6 @@
 public class AMNavigationPage : NavigationPage, IDisposable
 {
 
-    //public override bool CanChangeFocus(VisualElement element)
-    //{
-    //    //var entry = element as AMEntry;
-    //    //if (entry != null && entry.UnfocusLocked)
-    //    //{
-    //    //    return false;
-    //    //}
-
-    //    return base.CanChangeFocus(element);
-    //}
-
     private VisualElement _focusedElement;
     public VisualElement FocusedElement
     {
@@ -36,6 +25,13 @@ public class AMNavigationPage : NavigationPage, IDisposable
 
     public virtual bool CanChangeFocus(VisualElement element)
     {
+        //    //var entry = element as AMEntry;
+        //    //if (entry != null && entry.UnfocusLocked)
+        //    //{
+        //    //    return false;
+        //    //}
+
+        //    return base.CanChangeFocus(element);
 
         return true;
     }
