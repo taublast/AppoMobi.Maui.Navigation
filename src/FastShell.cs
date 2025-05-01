@@ -18,7 +18,6 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
 
     protected virtual void OnDisposing()
     {
-
     }
 
     public FastShell(IServiceProvider services)
@@ -45,14 +44,8 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
 
     public bool FlyoutEnabled
     {
-        get
-        {
-            return this.IsGestureEnabled;
-        }
-        set
-        {
-            this.IsGestureEnabled = value;
-        }
+        get { return this.IsGestureEnabled; }
+        set { this.IsGestureEnabled = value; }
     }
 
     public void Start(string route)
@@ -74,29 +67,23 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
 
         if (startupRoute.Parts.Count > 0)
         {
-            MainThread.BeginInvokeOnMainThread(async () =>
-            {
-                await GoToAsync(route, false);
-            });
+            MainThread.BeginInvokeOnMainThread(async () => { await GoToAsync(route, false); });
         }
     }
 
     protected virtual void OnStarted()
     {
-
     }
 
     private INavigation _navigationRoot;
+
     protected INavigation NavigationRoot
     {
         get
         {
-            return _navigationRoot;//base.Navigation;
+            return _navigationRoot; //base.Navigation;
         }
-        set
-        {
-            _navigationRoot = value;
-        }
+        set { _navigationRoot = value; }
     }
 
     public static void RegisterActionRoute(string route, Action switchToTab)
@@ -114,6 +101,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
             action?.Invoke();
             return true;
         }
+
         return false;
     }
 
@@ -131,22 +119,28 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
     public BindableObject GetOrCreateContent(string route)
     {
         BindableObject result = null;
-
-        if (s_routes.TryGetValue(route, out var content))
+        try
         {
-            //var createContent = content.GetOrCreate(_services);
+            if (s_routes.TryGetValue(route, out var content))
+            {
+                //var createContent = content.GetOrCreate(_services);
 
-            var createContent = content.GetOrCreateObject(_services);
+                var createContent = content.GetOrCreateObject(_services);
 
-            result = createContent;
+                result = createContent;
+            }
+
+            if (result == null)
+            {
+                // okay maybe its a type, we'll try that just to be nice to the user
+                var type = Type.GetType(route);
+                if (type != null)
+                    result = Activator.CreateInstance(type) as Element;
+            }
         }
-
-        if (result == null)
+        catch (Exception e)
         {
-            // okay maybe its a type, we'll try that just to be nice to the user
-            var type = Type.GetType(route);
-            if (type != null)
-                result = Activator.CreateInstance(type) as Element;
+            Trace.WriteLine($"[FastShell GetOrCreateContent `{route}`: {e}");
         }
 
         if (result != null)
@@ -197,6 +191,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
 
                 return (BindableObject)o;
             }
+
             return (BindableObject)Activator.CreateInstance(_type);
         }
 
@@ -212,6 +207,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
 
                 return (Element)o;
             }
+
             return (Element)Activator.CreateInstance(_type);
         }
 
@@ -228,12 +224,14 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
             return _type.GetHashCode();
         }
     }
+
     static void ValidateRoute(string route, RouteFactory routeFactory)
     {
         if (string.IsNullOrWhiteSpace(route))
             throw new ArgumentNullException(nameof(route), "Route cannot be an empty string");
 
-        routeFactory = routeFactory ?? throw new ArgumentNullException(nameof(routeFactory), "Route Factory cannot be null");
+        routeFactory = routeFactory ??
+                       throw new ArgumentNullException(nameof(routeFactory), "Route Factory cannot be null");
 
         var uri = new Uri(route, UriKind.RelativeOrAbsolute);
 
@@ -249,10 +247,12 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
         if (s_routes.TryGetValue(route, out existingRegistration) && !existingRegistration.Equals(routeFactory))
             throw new ArgumentException($"Duplicated Route: \"{route}\"");
     }
+
     internal static bool IsImplicit(string source)
     {
         return source.StartsWith(ImplicitPrefix, StringComparison.Ordinal);
     }
+
     public static string FormatRoute(List<string> segments)
     {
         var route = FormatRoute(String.Join(PathSeparator, segments));
@@ -277,9 +277,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
     const string DefaultPrefix = "D_FAULT_";
     internal const string PathSeparator = "/";
 
-
     #endregion
-
 
     #region INavigation
 
@@ -306,6 +304,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
             {
                 await NavigationRoot.PopAsync(animated);
             }
+
             ShellNavigationStack.RemoveLast();
 
             return inStack.Page as Page;
@@ -334,6 +333,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
             {
                 await NavigationRoot.PopAsync(animated);
             }
+
             ShellModalNavigationStack.RemoveLast();
 
             return inStack.Page as Page;
@@ -431,18 +431,13 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
 
     #endregion
 
-
-
     #region IAppShell
 
     public string OrderedRoute { get; protected set; }
 
-
     public virtual async Task GoToAsync(ShellNavigationState state)
     {
-
         await GoToAsync(state, false);
-
     }
 
     protected string _rootRoute;
@@ -459,6 +454,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
                 ret += $"{key.Key}={key.Value}&";
             }
         }
+
         return ret;
     }
 
@@ -483,7 +479,8 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
         }
     }
 
-    public virtual async Task PushRegisteredPageAsync(string registered, bool animate, IDictionary<string, object> arguments = null)
+    public virtual async Task PushRegisteredPageAsync(string registered, bool animate,
+        IDictionary<string, object> arguments = null)
     {
         var page = GetOrCreateContent(registered) as Page;
 
@@ -497,7 +494,6 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
                 ShellNavigationStack.Last.Value.Route = registered;
                 ShellNavigationStack.Last.Value.Arguments = arguments;
             });
-
         }
     }
 
@@ -509,8 +505,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
             {
                 needQuery.ApplyQueryAttributes(arguments);
             }
-            else
-            if (page.BindingContext != null)
+            else if (page.BindingContext != null)
             {
                 var type = page.BindingContext.GetType();
                 var t = type.GetAttribute<QueryPropertyAttribute>();
@@ -536,12 +531,12 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
             var route = state.Location.OriginalString.Trim();
             return ParseRoute(route);
         }
+
         return null;
     }
 
     public static ParsedRoute ParseRoute(string route)
     {
-
         var fix = new Uri("fix://" + route.Trim('/'));
 
         var arguments = System.Web.HttpUtility.ParseQueryString(fix.Query);
@@ -552,9 +547,9 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
         }
 
         List<string> parts = new List<string>
-            {
-                fix.Host
-            };
+        {
+            fix.Host
+        };
         foreach (var segment in fix.Segments)
         {
             var part = segment.Replace("/", "");
@@ -569,7 +564,6 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
             Parts = parts,
             Arguments = dict
         };
-
     }
 
     public virtual T GetOrCreateContentSetArguments<T>(ShellNavigationState state) where T : BindableObject
@@ -577,7 +571,8 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
         return GetOrCreateContentSetArguments<T>(state, null);
     }
 
-    public virtual T GetOrCreateContentSetArguments<T>(ShellNavigationState state, IDictionary<string, object> arguments) where T : BindableObject
+    public virtual T GetOrCreateContentSetArguments<T>(ShellNavigationState state,
+        IDictionary<string, object> arguments) where T : BindableObject
     {
         var route = state.Location.OriginalString.Trim();
 
@@ -604,8 +599,10 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
                             {
                                 SetArguments(content, arguments);
                             }
+
                             SetArguments(content, passArguments);
                         }
+
                         return content;
                     }
                     else
@@ -627,11 +624,13 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
                             {
                                 SetArguments(content, arguments);
                             }
+
                             SetArguments(content, passArguments);
                         }
 
                         return content;
                     }
+
                     index++;
                 }
             }
@@ -670,8 +669,7 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
                         {
                             await PopAsync(animate);
                         }
-                        else
-                        if (!ExecuteActionRoute(part))
+                        else if (!ExecuteActionRoute(part))
                         {
                             await PushRegisteredPageAsync(part, animate, passArguments);
                         }
@@ -696,46 +694,34 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
 
                 return;
             }
-
         }
 
         Console.WriteLine($"[FastShell] Unsupported URI {route}");
     }
 
     public new INavigation Navigation => this;
-
     public event EventHandler<ShellNavigatedEventArgs> Navigated;
-
     public event EventHandler<ShellNavigatingEventArgs> Navigating;
 
     public bool FlyoutIsPresented
     {
-        get
-        {
-            return IsPresented;
-        }
-        set
-        {
-            IsPresented = value;
-        }
+        get { return IsPresented; }
+        set { IsPresented = value; }
     }
-
 
     public void InvalidateNavBar()
     {
         OnNavBarInvalidated();
-
     }
 
     public virtual void OnNavBarInvalidated()
     {
-
     }
 
     public event EventHandler<RotationEventArgs> OnRotation;
-
     public event EventHandler<IndexArgs> TabReselected;
     public ObservableCollection<MenuPageItem> MenuItems { get; } = new ObservableCollection<MenuPageItem>();
+
     public async Task PopTabToRoot()
     {
         var inStack = ShellNavigationStack.LastOrDefault();
@@ -750,7 +736,6 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
 
     #endregion
 
-
     #region BUFFER
 
     /// <summary>
@@ -759,5 +744,4 @@ public partial class FastShell : AMFlyoutPage, IAppShell, INavigation, IDisposab
     public static ConcurrentDictionary<string, object> Buffer { get; } = new();
 
     #endregion
-
 }

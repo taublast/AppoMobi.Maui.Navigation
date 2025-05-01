@@ -117,7 +117,8 @@ public class MenuPageItem : BindableObject
 
     public Type TargetType { get; set; }
 
-    public dynamic TypeParameter { get; set; }
+    public object TypeParameter { get; set; }
+
     public Type ContentType { get; set; }
 
     public int Tab { get; set; } = 0;
